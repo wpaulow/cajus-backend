@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,16 +53,15 @@ public class UserControllerTest {
 
         @Bean
         public UserDtoMapper userDtoMapper() {
-            return new UserDtoMapper();
+        	return Mockito.mock(UserDtoMapper.class);
         }
     }
 
     @Test
+    @WithMockUser
     void shouldReturnUserDtoWhenUserExists() throws Exception {
     	UUID id = UUID.randomUUID();
         Email testEmail = new Email("email@example.com");
-        
-        // 1. Crie um usuário COMPLETO
         User fakeUser = User.load(
         		UserId.of(id),
                 testEmail,
@@ -70,10 +70,8 @@ public class UserControllerTest {
                 UserStatus.ACTIVE,
                 Instant.now(),
                 Instant.now()
-                );
+        );
             
-
-        // 2. Crie o DTO esperado com valores consistentes
         UserDto expectedDto = new UserDto(
             id, 
             testEmail.getValue(), 
@@ -83,14 +81,12 @@ public class UserControllerTest {
             fakeUser.getUpdatedAt()
         );
 
-        // 3. Configure os mocks corretamente
         Mockito.when(userService.findById(eq(UserId.of(id))))
-            .thenReturn(Optional.of(fakeUser)); // Garanta que retorna um Optional com user não-nulo
+            .thenReturn(Optional.of(fakeUser));
             
         Mockito.when(userDtoMapper.toDto(any(User.class)))
             .thenReturn(expectedDto);
 
-        // 4. Execute a requisição
         mvc.perform(get("/users/" + id)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

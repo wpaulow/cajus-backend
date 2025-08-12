@@ -53,7 +53,7 @@ public class UserServiceTest {
         when(passwordEncoder.encode("passMaluco")).thenReturn("hashedMaluco");
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
-        User user = userService.createUser("test@example.com", "passMaluco", UserRole.CANDIDATE);
+        User user = userService.createUser(new Email("test@example.com"), "passMaluco", UserRole.CANDIDATE);
         assertNotNull(user.getId());
         verify(userRepository).save(any(User.class));
     }
@@ -62,7 +62,7 @@ public class UserServiceTest {
     void createUser_duplicateEmail() {
         when(userRepository.existsByEmail(any())).thenReturn(true);
         assertThrows(IllegalArgumentException.class,
-            () -> userService.createUser("x@x.com", "pw", UserRole.CANDIDATE));
+            () -> userService.createUser(new Email("x@x.com"), "pw", UserRole.CANDIDATE));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class UserServiceTest {
     @Test
     void deleteUser_success() {
         UserId id = UserId.generate();
-        when(userRepository.findById(id)).thenReturn(Optional.of(mock(User.class)));
+//        when(userRepository.findById(id)).thenReturn(Optional.of(mock(User.class)));
         doNothing().when(userRepository).deleteById(id);
 
         assertDoesNotThrow(() -> userService.deleteUser(id));
