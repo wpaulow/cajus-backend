@@ -16,6 +16,7 @@ import com.cajusrh.recruitment.api.dto.UserDto;
 import com.cajusrh.recruitment.api.mappers.UserDtoMapper;
 import com.cajusrh.recruitment.application.service.UserService;
 import com.cajusrh.recruitment.core.domain.entities.User;
+import com.cajusrh.recruitment.core.domain.valueobjects.Email;
 import com.cajusrh.recruitment.core.domain.valueobjects.UserId;
 
 @RestController
@@ -31,8 +32,9 @@ public class UserController {
     
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody CreateUserRequest req) {
+    	Email email = new Email(req.email());
         User id = userService.createUser(
-    		req.email(), 
+    		email, 
     		req.password(), 
     		req.role()
         );
